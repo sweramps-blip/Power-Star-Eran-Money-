@@ -1,0 +1,727 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Power Star | Secure Auth</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Outfit', sans-serif;
+  background: #0a0e1a;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   BACKGROUND GLOW
+   ============================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(251,191,36,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================================
+   PAGE LAYOUT
+   ============================================================ */
+.page {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+   LOGO AREA
+   ============================================================ */
+.logo-wrap {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.logo-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #0a0e1a;
+  box-shadow: 0 6px 24px rgba(251,191,36,0.35);
+  margin-bottom: 14px;
+}
+
+.logo-wrap h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.logo-wrap p {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 3px;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   AUTH CARD
+   ============================================================ */
+.card {
+  width: 100%;
+  max-width: 380px;
+  background: #131829;
+  border: 1px solid #1e2a45;
+  border-radius: 24px;
+  padding: 28px 22px 24px;
+  position: relative;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.35);
+}
+
+/* ============================================================
+   TAB SWITCHER (Login / Register)
+   ============================================================ */
+.tab-bar {
+  display: flex;
+  background: #0a0e1a;
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 28px;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #0a0e1a;
+  box-shadow: 0 3px 12px rgba(251,191,36,0.3);
+}
+
+/* ============================================================
+   FORM PANELS
+   ============================================================ */
+.form-panel {
+  display: none;
+  animation: fadeUp 0.35s ease;
+}
+
+.form-panel.active {
+  display: block;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   INPUT FIELD
+   ============================================================ */
+.field {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 7px;
+  padding-left: 2px;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap input {
+  width: 100%;
+  padding: 13px 14px;
+  padding-left: 42px;
+  background: #0f1423;
+  border: 1.5px solid #1e2a45;
+  border-radius: 13px;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  -webkit-appearance: none;
+}
+
+.input-wrap input::placeholder {
+  color: #3d4f6e;
+  font-weight: 400;
+}
+
+.input-wrap input:focus {
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 3px rgba(251,191,36,0.15);
+}
+
+/* Icon inside input */
+.input-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3d4f6e;
+  font-size: 14px;
+  pointer-events: none;
+  transition: color 0.25s;
+}
+
+.input-wrap:focus-within .input-icon {
+  color: #fbbf24;
+}
+
+/* Eye toggle icon */
+.eye-toggle {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3d4f6e;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.25s;
+  background: none;
+  border: none;
+  padding: 4px;
+  z-index: 2;
+}
+
+.eye-toggle:hover {
+  color: #fbbf24;
+}
+
+/* Phone prefix */
+.phone-prefix {
+  position: absolute;
+  left: 38px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fbbf24;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-wrap.phone input {
+  padding-left: 78px;
+}
+
+/* ============================================================
+   PASSWORD STRENGTH BAR
+   ============================================================ */
+.strength-track {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+  height: 3px;
+}
+
+.strength-seg {
+  flex: 1;
+  border-radius: 3px;
+  background: #1e2a45;
+  transition: background 0.3s;
+}
+
+.strength-seg.on-weak   { background: #ef4444; }
+.strength-seg.on-medium { background: #f97316; }
+.strength-seg.on-strong { background: #22c55e; }
+
+.strength-label {
+  font-size: 11px;
+  margin-top: 5px;
+  font-weight: 600;
+  min-height: 16px;
+  padding-left: 2px;
+  transition: color 0.3s;
+}
+
+/* ============================================================
+   TERMS ROW
+   ============================================================ */
+.terms-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 20px;
+  margin-top: 4px;
+}
+
+.terms-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  margin-top: 1px;
+  accent-color: #fbbf24;
+  cursor: pointer;
+}
+
+.terms-row label {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.terms-row label .highlight {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+/* ============================================================
+   SUBMIT BUTTON
+   ============================================================ */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: none;
+  border-radius: 13px;
+  color: #0a0e1a;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: transform 0.15s, box-shadow 0.25s, filter 0.25s;
+  box-shadow: 0 4px 16px rgba(251,191,36,0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent 60%);
+  pointer-events: none;
+}
+
+.submit-btn:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 22px rgba(251,191,36,0.4);
+}
+
+.submit-btn:active {
+  transform: scale(0.96);
+}
+
+/* ============================================================
+   DEVICE ID ROW
+   ============================================================ */
+.device-row {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 11px;
+  color: #3d4f6e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.device-row .did-value {
+  color: #64748b;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.device-row .did-eye {
+  cursor: pointer;
+  color: #3d4f6e;
+  font-size: 11px;
+  transition: color 0.2s;
+}
+
+.device-row .did-eye:hover {
+  color: #fbbf24;
+}
+
+/* ============================================================
+   SWEETALERT OVERRIDE (dark theme)
+   ============================================================ */
+.swal2-popup {
+  background: #131829 !important;
+  color: #fff !important;
+  border-radius: 18px !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+.swal2-title { color: #fff !important; }
+.swal2-html-container { color: #94a3b8 !important; }
+.swal2-confirm {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+  color: #0a0e1a !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+}
+
+/* ============================================================
+   MOBILE FINE-TUNE
+   ============================================================ */
+@media (max-width: 400px) {
+  .page { padding: 24px 12px; }
+  .card { padding: 22px 16px 20px; border-radius: 20px; }
+  .logo-icon { width: 54px; height: 54px; font-size: 24px; border-radius: 15px; }
+  .logo-wrap h1 { font-size: 20px; }
+  .tab-btn { font-size: 13px; padding: 9px 0; }
+  .input-wrap input { font-size: 15px; padding: 12px 14px 12px 40px; }
+  .input-wrap.phone input { padding-left: 74px; }
+}
+
+/* Prevent zoom on input focus on iOS */
+@media screen and (max-width: 480px) {
+  input { font-size: 16px !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- LOGO -->
+  <div class="logo-wrap">
+    <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+    <h1>Power Star</h1>
+    <p>Secure Authentication</p>
+  </div>
+
+  <!-- CARD -->
+  <div class="card">
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn"        id="tab-register" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- =========== LOGIN PANEL =========== -->
+    <div class="form-panel active" id="panel-login">
+
+      <div class="field">
+        <label>Phone Number</label>
+        <div class="input-wrap phone">
+          <i class="fas fa-phone input-icon"></i>
+          <span class="phone-prefix">+92</span>
+          <input type="tel" id="l-num" placeholder="3001234567" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" id="l-pass" placeholder="Enter password">
+          <button class="eye-toggle" onclick="toggleEye('l-pass', this)" aria-label="Toggle password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="doLogin()">Login</button>
+
+    </div>
+
+    <!-- =========== REGISTER PANEL =========== -->
+    <div class="form-panel" id="panel-register">
+
+      <div class="field">
+        <label>Full Name</label>
+        <div class="input-wrap">
+          <i class="fas fa-user input-icon"></i>
+          <input type="text" id="r-name" placeholder="Your full name">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Phone Number</label>
+        <div class="input-wrap phone">
+          <i class="fas fa-phone input-icon"></i>
+          <span class="phone-prefix">+92</span>
+          <input type="tel" id="r-num" placeholder="3001234567" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" id="r-pass" placeholder="Create password" oninput="checkStrength()">
+          <button class="eye-toggle" onclick="toggleEye('r-pass', this)" aria-label="Toggle password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <!-- Strength segments -->
+        <div class="strength-track">
+          <div class="strength-seg" id="seg1"></div>
+          <div class="strength-seg" id="seg2"></div>
+          <div class="strength-seg" id="seg3"></div>
+        </div>
+        <div class="strength-label" id="strength-label"></div>
+      </div>
+
+      <div class="field">
+        <label>Referral Code <span style="color:#3d4f6e;font-weight:400">(optional)</span></label>
+        <div class="input-wrap">
+          <i class="fas fa-tag input-icon"></i>
+          <input type="text" id="r-ref" placeholder="Enter referral code">
+        </div>
+      </div>
+
+      <div class="terms-row">
+        <input type="checkbox" id="terms-chk">
+        <label for="terms-chk">
+          I accept the <span class="highlight">Terms &amp; Conditions</span> and <span class="highlight">Privacy Policy</span>
+        </label>
+      </div>
+
+      <button class="submit-btn" onclick="doRegister()">Create Account</button>
+
+    </div>
+
+    <!-- DEVICE ID -->
+    <div class="device-row">
+      <i class="fas fa-shield-halved" style="font-size:10px"></i>
+      Device ID:
+      <span class="did-value" id="did-text">######</span>
+      <i class="fas fa-eye did-eye" id="did-eye-icon" onclick="toggleDID()"></i>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────
+const API = "https://script.google.com/macros/s/AKfycbxG5IHg_SLzmygNLPpBTzSAX07Ydb2Ixqyg0-YOKReiBbSVfkggVfCoCPWaCBzromFPSA/exec";
+const KEY = "POWER_STAR_786_SECURE";
+
+// ─── DEVICE ID ───────────────────────────────────────────────
+const current_device_id = btoa(
+  navigator.userAgent + screen.width + screen.height +
+  Intl.DateTimeFormat().resolvedOptions().timeZone
+).substring(0, 25);
+
+document.getElementById("did-text").innerText = current_device_id.slice(0, 6) + "****";
+
+// ─── TAB SWITCHER ────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById("tab-login").classList.toggle("active", tab === "login");
+  document.getElementById("tab-register").classList.toggle("active", tab === "register");
+  document.getElementById("panel-login").classList.toggle("active", tab === "login");
+  document.getElementById("panel-register").classList.toggle("active", tab === "register");
+}
+
+// ─── EYE TOGGLE ──────────────────────────────────────────────
+function toggleEye(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const icon  = btn.querySelector("i");
+  if (input.type === "password") {
+    input.type = "text";
+    icon.classList.replace("fa-eye", "fa-eye-slash");
+  } else {
+    input.type = "password";
+    icon.classList.replace("fa-eye-slash", "fa-eye");
+  }
+}
+
+// ─── PASSWORD STRENGTH ───────────────────────────────────────
+function checkStrength() {
+  const p     = document.getElementById("r-pass").value;
+  const segs  = [document.getElementById("seg1"), document.getElementById("seg2"), document.getElementById("seg3")];
+  const label = document.getElementById("strength-label");
+
+  segs.forEach(s => { s.className = "strength-seg"; });
+  label.innerText = "";
+  label.style.color = "";
+
+  if (p.length === 0) return;
+
+  if (p.length < 6) {
+    segs[0].classList.add("on-weak");
+    label.innerText = "Weak";
+    label.style.color = "#ef4444";
+  } else if (p.length < 10) {
+    segs[0].classList.add("on-medium");
+    segs[1].classList.add("on-medium");
+    label.innerText = "Medium";
+    label.style.color = "#f97316";
+  } else {
+    segs[0].classList.add("on-strong");
+    segs[1].classList.add("on-strong");
+    segs[2].classList.add("on-strong");
+    label.innerText = "Strong";
+    label.style.color = "#22c55e";
+  }
+}
+
+// ─── DEVICE ID TOGGLE ────────────────────────────────────────
+function toggleDID() {
+  const el   = document.getElementById("did-text");
+  const icon = document.getElementById("did-eye-icon");
+  if (el.innerText.includes("*")) {
+    el.innerText = current_device_id;
+    icon.classList.replace("fa-eye", "fa-eye-slash");
+  } else {
+    el.innerText = current_device_id.slice(0, 6) + "****";
+    icon.classList.replace("fa-eye-slash", "fa-eye");
+  }
+}
+
+// ─── LOGIN ───────────────────────────────────────────────────
+async function doLogin() {
+  const num  = document.getElementById("l-num").value.trim();
+  const pass = document.getElementById("l-pass").value.trim();
+
+  if (!num || !pass) {
+    return Swal.fire({ icon: "warning", title: "Empty Fields", text: "Please fill all fields." });
+  }
+
+  Swal.showLoading();
+
+  let users;
+  try {
+    users = await fetch(API).then(r => r.json());
+  } catch (e) {
+    return Swal.fire({ icon: "error", title: "Network Error", text: "Could not connect. Try again." });
+  }
+
+  const user = users.find(u => u.number === num && u.password === pass);
+
+  if (!user) {
+    return Swal.fire({ icon: "error", title: "Login Failed", text: "Wrong number or password." });
+  }
+
+  if (user.device_id && user.device_id !== current_device_id) {
+    return Swal.fire({ icon: "error", title: "Blocked", text: "Account is linked to another device." });
+  }
+
+  localStorage.setItem("ps_user", JSON.stringify(user));
+  Swal.fire({ icon: "success", title: "Success!", text: "Logged in successfully." });
+}
+
+// ─── REGISTER ────────────────────────────────────────────────
+async function doRegister() {
+  const name  = document.getElementById("r-name").value.trim();
+  const num   = document.getElementById("r-num").value.trim();
+  const pass  = document.getElementById("r-pass").value.trim();
+  const ref   = document.getElementById("r-ref").value.trim();
+  const terms = document.getElementById("terms-chk").checked;
+
+  if (!name || !num || !pass) {
+    return Swal.fire({ icon: "warning", title: "Empty Fields", text: "Please fill all required fields." });
+  }
+
+  if (num.length < 10) {
+    return Swal.fire({ icon: "warning", title: "Invalid Number", text: "Enter a valid 10-digit number after +92." });
+  }
+
+  if (pass.length < 6) {
+    return Swal.fire({ icon: "warning", title: "Weak Password", text: "Password must be at least 6 characters." });
+  }
+
+  if (!terms) {
+    return Swal.fire({ icon: "info", title: "Terms Required", text: "Please accept Terms & Conditions." });
+  }
+
+  Swal.showLoading();
+
+  let users;
+  try {
+    users = await fetch(API).then(r => r.json());
+  } catch (e) {
+    return Swal.fire({ icon: "error", title: "Network Error", text: "Could not connect. Try again." });
+  }
+
+  if (users.some(u => u.number === num)) {
+    return Swal.fire({ icon: "error", title: "Already Registered", text: "This number is already in use." });
+  }
+
+  const payload = {
+    key:       KEY,
+    name:      name,
+    number:    num,
+    password:  pass,
+    referral:  ref,
+    user_id:   "PSSN" + String(users.length + 1).padStart(4, "0"),
+    device_id: current_device_id
+  };
+
+  try {
+    await fetch(API, { method: "POST", body: JSON.stringify(payload) });
+  } catch (e) {
+    return Swal.fire({ icon: "error", title: "Failed", text: "Registration failed. Try again." });
+  }
+
+  Swal.fire({ icon: "success", title: "Done!", text: "Account created. You can login now." }).then(() => {
+    document.getElementById("r-name").value  = "";
+    document.getElementById("r-num").value   = "";
+    document.getElementById("r-pass").value  = "";
+    document.getElementById("r-ref").value   = "";
+    document.getElementById("terms-chk").checked = false;
+    checkStrength();
+    switchTab("login");
+  });
+}
+</script>
+
+</body>
+</html>
