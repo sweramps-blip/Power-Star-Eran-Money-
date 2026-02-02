@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Power Star | Secure Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root { --gold: #fbbf24; --blue: #3b82f6; --bg: #0b0f1a; --card: #161e2e; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: white; padding: 15px; overflow-x: hidden; }
+        #admin-lock { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .lock-box { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid var(--gold); text-align: center; width: 100%; max-width: 350px; }
+        #main-admin-ui { display: none; max-width: 500px; margin: 0 auto; }
+        .card { background: var(--card); border: 1px solid #2d3748; border-radius: 20px; padding: 20px; margin-bottom: 20px; }
+        h2 { color: var(--gold); text-align: center; margin-bottom: 20px; text-transform: uppercase; font-size: 18px; }
+        input, select { width: 100%; padding: 14px; margin-bottom: 12px; background: #050810; border: 1px solid #334155; color: white; border-radius: 12px; outline: none; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-gold { background: var(--gold); color: black; }
+        #search-result { background: #0f172a; padding: 15px; border-radius: 12px; margin-top: 10px; display: none; border: 1px solid #1e293b; font-size: 13px; line-height: 1.6; }
+        .w-item { background: #1e293b; padding: 15px; border-radius: 15px; margin-top: 15px; border-left: 5px solid var(--gold); }
+    </style>
+</head>
+<body>
+
+<div id="admin-lock">
+    <div class="lock-box">
+        <i class="fas fa-user-shield" style="font-size: 40px; color: var(--gold); margin-bottom: 20px;"></i>
+        <h3>Master Access</h3>
+        <input type="password" id="admin-pass" placeholder="Security Key" style="text-align: center;">
+        <button class="btn btn-gold" onclick="verifyAccess()">Unlock System</button>
+    </div>
+</div>
+
+<div id="main-admin-ui">
+    <h2><i class="fas fa-crown"></i> Admin Master</h2>
+    
+    <div class="card">
+        <h3>User Management</h3>
+        <input type="text" id="sid" placeholder="Referral ID (e.g. AQ4817)">
+        <button class="btn btn-blue" onclick="findUser()"><i class="fas fa-search"></i> Search User</button>
+        <div id="search-result"></div>
+        
+        <div id="action-box" style="display:none; margin-top:20px; border-top: 1px solid #334155; padding-top:20px;">
+            <input type="number" id="f-amt" placeholder="Amount (PKR)">
+            <select id="f-field">
+                <option value="balance">Main Wallet (Col E)</option>
+                <option value="claimed_comm">Commission (Col J)</option>
+            </select>
+            <select id="f-type">
+                <option value="SALARY">SALARY</option>
+                <option value="REWARD">REWARD</option>
+                <option value="BONUS">BONUS</option>
+            </select>
+            <button class="btn btn-gold" onclick="sendMoney()"><i class="fas fa-paper-plane"></i> Execute Transfer</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Withdrawal Requests</h3>
+        <div id="w-list"><p style="text-align:center; opacity:0.3; font-size:12px;">Syncing with Sheet...</p></div>
+    </div>
+    
+    <button onclick="logoutAdmin()" style="background:none; border:none; color:#ef4444; width:100%; font-size:12px; cursor:pointer; margin-bottom:20px;">Secure Logout</button>
+</div>
+
+<script>
+    // Updated API Connection
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZ1yoCCbcaw6FF0c5mSK79aTwgAmK0b8OCO_4zkkNc_V02lH_5alokOo2XcUYqBb1X2A/exec";
+    const AUTH_KEY = "POWER_STAR_786_SECURE";
+    const MASTER_KEY = "Hussain@2025";
+    let allData = [];
+
+    function verifyAccess() {
+        if(document.getElementById('admin-pass').value === MASTER_KEY) {
+            sessionStorage.setItem('admin_auth', 'true');
+            document.getElementById('admin-lock').style.display = 'none';
+            document.getElementById('main-admin-ui').style.display = 'block';
+            loadData();
+        } else {
+            Swal.fire("Denied", "Incorrect Key", "error");
+        }
+    }
+
+    window.onload = () => {
+        if(sessionStorage.getItem('admin_auth') === 'true') {
+            document.getElementById('admin-lock').style.display = 'none';
+            document.getElementById('main-admin-ui').style.display = 'block';
+            loadData();
+        }
+    };
+
+    async function loadData() {
+        try {
+            const r = await fetch(SCRIPT_URL);
+            allData = await r.json();
+            renderWithdrawals();
+        } catch(e) { console.log("API Error"); }
+    }
+
+    function renderWithdrawals() {
+        const pending = allData.filter(x => x.row_type === "WITHDRAWAL" && (x.status === "pending" || !x.status));
+        const list = document.getElementById('w-list');
+        list.innerHTML = pending.length ? pending.map(w => {
+            const bind = allData.find(x => x.number === w.number && x.row_type === "BINDING") || {};
+            return `<div class="w-item">
+                <b>Phone: ${w.number}</b><br>
+                Amount: Rs. ${w.w_amount}<br>
+                <small>${bind.wallet_name || 'N/A'}: ${bind.acc_number || 'No Account Bound'}</small><br>
+                <button class="btn btn-gold" style="height:35px; margin-top:10px; font-size:11px;" 
+                onclick="updateStatus('${w.number}', '${w.w_amount}', 'success')">Approve Payment</button>
+            </div>`;
+        }).join('') : "No pending requests.";
+    }
+
+    async function findUser() {
+        const id = document.getElementById('sid').value;
+        const main = allData.find(x => x.user_id === id && (!x.row_type || x.row_type === "REGISTRATION"));
+        const bind = allData.find(x => x.user_id === id && x.row_type === "BINDING");
+        
+        if(main) {
+            document.getElementById('search-result').style.display = 'block';
+            document.getElementById('action-box').style.display = 'block';
+            document.getElementById('search-result').innerHTML = `
+                <b>Name:</b> ${main.name}<br>
+                <b>Phone:</b> ${main.number}<br>
+                <b>Wallet Bal:</b> Rs. ${main.balance}<br>
+                <b>Commission:</b> Rs. ${main.claimed_comm || 0}`;
+            window.activeUser = main;
+        } else {
+            Swal.fire("Not Found", "Invalid User ID", "warning");
+        }
+    }
+
+    async function sendMoney() {
+        const amt = document.getElementById('f-amt').value;
+        const field = document.getElementById('f-field').value;
+        const type = document.getElementById('f-type').value;
+        if(!window.activeUser || !amt) return;
+
+        Swal.fire({title: 'Transferring...', didOpen: () => Swal.showLoading()});
+        
+        const payload = {
+            key: AUTH_KEY,
+            row_type: type,
+            number: window.activeUser.number,
+            w_amount: amt,
+            target_field: field // Ye salary/reward ke liye balance update karega
+        };
+
+        fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+        .then(() => {
+            Swal.fire("Success", "Funds Sent!", "success").then(() => location.reload());
+        });
+    }
+
+    async function updateStatus(num, amt, newStatus) {
+        Swal.fire({title: 'Updating...', didOpen: () => Swal.showLoading()});
+        const payload = {
+            key: AUTH_KEY,
+            row_type: "UPDATE_STATUS",
+            number: num,
+            w_amount: amt,
+            new_status: newStatus
+        };
+
+        fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+        .then(() => {
+            Swal.fire("Updated", "Status marked as Success", "success").then(() => location.reload());
+        });
+    }
+
+    function logoutAdmin() { sessionStorage.clear(); location.reload(); }
+</script>
+</body>
+</html>
