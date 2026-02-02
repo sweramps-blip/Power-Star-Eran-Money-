@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Statements | Power Star</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --gold: #fbbf24; --bg: #0b0f1a; --card: #161e2e; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: white; padding: 15px; }
+        .h-wrapper { max-width: 480px; margin: 0 auto; }
+        .h-item { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 10px; border: 1px solid #2d3748; display: flex; justify-content: space-between; align-items: center; }
+        .info b { font-size: 12px; text-transform: uppercase; color: #f8fafc; display: block; }
+        .info small { font-size: 10px; color: #94a3b8; }
+        .amt-box { text-align: right; }
+        .amt { font-weight: 700; font-size: 14px; }
+        .status { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-top: 5px; display: inline-block; }
+        .green { color: #10b981; } .red { color: #ef4444; }
+        .bg-p { background: rgba(251,191,36,0.1); color: var(--gold); }
+        .bg-s { background: rgba(16,185,129,0.1); color: #10b981; }
+    </style>
+</head>
+<body>
+<div class="h-wrapper">
+    <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
+        <i class="fas fa-arrow-left" onclick="window.location.href='wallet.html'"></i>
+        <h2 style="font-size:18px;">Transaction Ledger</h2>
+    </div>
+    <div id="h-list"><p style="text-align:center; opacity:0.3; font-size:12px; margin-top:50px;">Fetching logs...</p></div>
+</div>
+<script>
+    async function load() {
+        const user = JSON.parse(localStorage.getItem('power_star_user'));
+        const API = "https://sheetdb.io/api/v1/lcnr1ekbbyn58";
+        const r = await fetch(`${API}/search?number=${user.number}`);
+        const d = await r.json();
+        const logs = d.filter(x => x.row_type && x.row_type !== 'BINDING');
+        const list = document.getElementById('h-list');
+        list.innerHTML = logs.length ? logs.reverse().map(l => {
+            const isOut = l.row_type === 'WITHDRAWAL';
+            return `<div class="h-item">
+                <div class="info"><b>${l.row_type}</b><small>${l.date}</small></div>
+                <div class="amt-box">
+                    <span class="amt ${isOut ? 'red' : 'green'}">${isOut ? '-' : '+'} Rs. ${l.w_amount}</span><br>
+                    <span class="status ${l.status === 'pending' ? 'bg-p' : 'bg-s'}">${l.status}</span>
+                </div>
+            </div>`;
+        }).join('') : "No transactions.";
+    }
+    window.onload = load;
+</script>
+</body>
+</html>
