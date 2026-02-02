@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Power Star | Marketing & Tasks</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --gold: #fbbf24;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text-dim: #94a3b8;
+            --green: #10b981;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: white;
+            padding: 15px;
+            padding-bottom: 90px;
+        }
+        
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h2 {
+            font-size: 22px;
+            color: var(--gold);
+        }
+        
+        .balance-chip {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid var(--gold);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        /* Tab System */
+        .tab-bar {
+            display: flex;
+            background: var(--card);
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 25px;
+            gap: 5px;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-dim);
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 13px;
+        }
+        
+        .tab-btn.active {
+            background: var(--gold);
+            color: black;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Platform Icons */
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .platform-card {
+            background: var(--card);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 18px;
+            padding: 20px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .platform-card:active {
+            transform: scale(0.95);
+        }
+        
+        .platform-card.selected {
+            background: rgba(251, 191, 36, 0.15);
+            border-color: var(--gold);
+        }
+        
+        .platform-icon {
+            font-size: 30px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .platform-name {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        /* Task Card */
+        .task-card {
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .task-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .task-reward {
+            background: var(--gold);
+            color: black;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        
+        .task-desc {
+            font-size: 12px;
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .task-platform {
+            display: inline-block;
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--gold);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .task-limit {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+        
+        .btn-task {
+            padding: 10px 20px;
+            background: var(--gold);
+            color: black;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        
+        .btn-task:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-task.disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+        
+        /* Submission Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 25px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            z-index: 101;
+            display: none;
+        }
+        
+        .modal.active {
+            display: block;
+            animation: modalSlide 0.3s;
+        }
+        
+        @keyframes modalSlide {
+            from { transform: translate(-50%, -40%); opacity: 0; }
+            to { transform: translate(-50%, -50%); opacity: 1; }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px;
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .form-input:focus {
+            border-color: var(--gold);
+        }
+        
+        .file-upload {
+            position: relative;
+            width: 100%;
+            height: 150px;
+            border: 2px dashed rgba(251, 191, 36, 0.3);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--gold);
+            background: rgba(251, 191, 36, 0.05);
+        }
+        
+        .file-upload input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-upload-icon {
+            font-size: 40px;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+        
+        .file-upload-text {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+        
+        .preview-img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--gold);
+            color: black;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-icon {
+            font-size: 50px;
+            color: var(--text-dim);
+            margin-bottom: 15px;
+        }
+        
+        .empty-text {
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+        
+        /* Bottom Navigation */
+        .nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--card);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 2px solid var(--gold);
+            z-index: 50;
+        }
+        
+        .nav a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 11px;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .nav a.active {
+            color: var(--gold);
+            font-weight: bold;
+        }
+        
+        .nav i {
+            font-size: 22px;
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2><i class="fas fa-rocket"></i> Marketing</h2>
+        <div class="balance-chip">Rs. <span id="user-balance">0.00</span></div>
+    </div>
+    
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('tasks')">
+            <i class="fas fa-tasks"></i> Tasks
+        </button>
+        <button class="tab-btn" onclick="switchTab('products')">
+            <i class="fas fa-box"></i> Products
+        </button>
+        <button class="tab-btn" onclick="switchTab('history')">
+            <i class="fas fa-clock"></i> My Tasks
+        </button>
+    </div>
+    
+    <!-- Tasks Tab -->
+    <div class="tab-content active" id="tab-tasks">
+        <div class="platform-grid">
+            <div class="platform-card" data-platform="all" onclick="filterPlatform('all')">
+                <span class="platform-icon">🌐</span>
+                <div class="platform-name">All</div>
+            </div>
+            <div class="platform-card" data-platform="youtube" onclick="filterPlatform('youtube')">
+                <span class="platform-icon">🎬</span>
+                <div class="platform-name">YouTube</div>
+            </div>
+            <div class="platform-card" data-platform="facebook" onclick="filterPlatform('facebook')">
+                <span class="platform-icon">👤</span>
+                <div class="platform-name">Facebook</div>
+            </div>
+            <div class="platform-card" data-platform="instagram" onclick="filterPlatform('instagram')">
+                <span class="platform-icon">📷</span>
+                <div class="platform-name">Instagram</div>
+            </div>
+            <div class="platform-card" data-platform="tiktok" onclick="filterPlatform('tiktok')">
+                <span class="platform-icon">🎵</span>
+                <div class="platform-name">TikTok</div>
+            </div>
+            <div class="platform-card" data-platform="linkedin" onclick="filterPlatform('linkedin')">
+                <span class="platform-icon">💼</span>
+                <div class="platform-name">LinkedIn</div>
+            </div>
+        </div>
+        
+        <div id="tasks-container">
+            <p style="text-align:center; opacity:0.5; padding:40px 0;">Loading tasks...</p>
+        </div>
+    </div>
+    
+    <!-- Products Tab -->
+    <div class="tab-content" id="tab-products">
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-shopping-bag"></i></div>
+            <div class="empty-text">Digital Products Coming Soon!<br>Premium courses, ebooks, and more.</div>
+        </div>
+    </div>
+    
+    <!-- History Tab -->
+    <div class="tab-content" id="tab-history">
+        <div id="history-container">
+            <p style="text-align:center; opacity:0.5; padding:40px 0;">Loading your submissions...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Task Submission Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
+<div class="modal" id="task-modal">
+    <div class="modal-header">
+        <div class="modal-title">Submit Task</div>
+        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label">Task URL/Link</label>
+        <input type="url" class="form-input" id="task-url-input" placeholder="Paste the task link here">
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label">Screenshot Proof (Optional)</label>
+        <div class="file-upload">
+            <input type="file" id="file-input" accept="image/*" onchange="previewImage(event)">
+            <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+            <div class="file-upload-text">Tap to upload screenshot</div>
+        </div>
+        <img id="preview-img" class="preview-img">
+    </div>
+    
+    <button class="btn-submit" onclick="submitTask()">
+        <i class="fas fa-paper-plane"></i> Submit for Approval
+    </button>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="nav">
+    <a href="dashboard.html"><i class="fas fa-home"></i>Home</a>
+    <a href="marketing.html" class="active"><i class="fas fa-rocket"></i>Marketing</a>
+    <a href="team.html"><i class="fas fa-users"></i>Team</a>
+    <a href="wallet.html"><i class="fas fa-wallet"></i>Wallet</a>
+</div>
+
+<script>
+    // Configuration
+    const API_URL = "https://script.google.com/macros/s/AKfycbxHpm9DPGQJFbApiQqpGnPcze1MscjqGEiRC10CuxxtPmYm23gQA6LFywPU9YNSAW6ZAA/exec"; // Replace with your deployed Apps Script URL
+    const AUTH_KEY = "POWER_STAR_786_SECURE";
+    
+    let user = JSON.parse(localStorage.getItem('power_star_user'));
+    let allTasks = [];
+    let selectedTask = null;
+    let currentFilter = 'all';
+    
+    // Initialize
+    window.onload = () => {
+        if (!user) {
+            window.location.href = 'auth.html';
+            return;
+        }
+        
+        document.getElementById('user-balance').innerText = parseFloat(user.balance || 0).toFixed(2);
+        loadTasks();
+        loadHistory();
+    };
+    
+    // Load Tasks
+    async function loadTasks() {
+        try {
+            const response = await fetch(`${API_URL}?action=getTasks`);
+            allTasks = await response.json();
+            renderTasks();
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+            document.getElementById('tasks-container').innerHTML = 
+                '<p style="text-align:center; color:#ef4444;">Failed to load tasks</p>';
+        }
+    }
+    
+    // Render Tasks
+    function renderTasks() {
+        const container = document.getElementById('tasks-container');
+        
+        if (allTasks.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-inbox"></i></div>
+                    <div class="empty-text">No tasks available right now.<br>Check back soon!</div>
+                </div>
+            `;
+            return;
+        }
+        
+        const filteredTasks = currentFilter === 'all' 
+            ? allTasks 
+            : allTasks.filter(t => t.platform.toLowerCase() === currentFilter);
+        
+        if (filteredTasks.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-filter"></i></div>
+                    <div class="empty-text">No ${currentFilter} tasks available</div>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = filteredTasks.map(task => `
+            <div class="task-card">
+                <div class="task-header">
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-reward">Rs. ${task.reward_amount}</div>
+                </div>
+                <div class="task-platform">
+                    <i class="fas fa-${getPlatformIcon(task.platform)}"></i> ${task.platform}
+                </div>
+                <div class="task-desc">${task.description}</div>
+                <div class="task-footer">
+                    <div class="task-limit">
+                        <i class="fas fa-redo"></i> ${task.daily_limit}/day
+                    </div>
+                    <button class="btn-task" onclick='openTaskModal(${JSON.stringify(task)})'>
+                        Start Task
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Platform Filter
+    function filterPlatform(platform) {
+        currentFilter = platform;
+        
+        // Update UI
+        document.querySelectorAll('.platform-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        document.querySelector(`[data-platform="${platform}"]`).classList.add('selected');
+        
+        renderTasks();
+    }
+    
+    // Get Platform Icon
+    function getPlatformIcon(platform) {
+        const icons = {
+            'youtube': 'youtube',
+            'facebook': 'facebook',
+            'instagram': 'instagram',
+            'tiktok': 'tiktok',
+            'linkedin': 'linkedin',
+            'twitter': 'twitter'
+        };
+        return icons[platform.toLowerCase()] || 'globe';
+    }
+    
+    // Open Task Modal
+    function openTaskModal(task) {
+        selectedTask = task;
+        document.getElementById('modal-overlay').style.display = 'block';
+        document.getElementById('task-modal').classList.add('active');
+        
+        // Open task URL in new tab
+        if (task.task_url) {
+            window.open(task.task_url, '_blank');
+        }
+    }
+    
+    // Close Modal
+    function closeModal() {
+        document.getElementById('modal-overlay').style.display = 'none';
+        document.getElementById('task-modal').classList.remove('active');
+        document.getElementById('task-url-input').value = '';
+        document.getElementById('file-input').value = '';
+        document.getElementById('preview-img').style.display = 'none';
+        selectedTask = null;
+    }
+    
+    // Preview Image
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.getElementById('preview-img');
+                img.src = e.target.result;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    // Submit Task
+    async function submitTask() {
+        if (!selectedTask) return;
+        
+        const taskUrl = document.getElementById('task-url-input').value.trim();
+        
+        if (!taskUrl) {
+            Swal.fire('Error', 'Please paste the task URL', 'warning');
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Submitting...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+        
+        try {
+            // In real implementation, upload screenshot to image hosting service
+            // For now, we'll just send the URL
+            const payload = {
+                key: AUTH_KEY,
+                action: 'SUBMIT_TASK',
+                number: user.number,
+                user_id: user.user_id,
+                task_id: selectedTask.task_id,
+                screenshot_url: taskUrl // In production, this would be uploaded image URL
+            };
+            
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(payload)
+            });
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Submitted!',
+                text: 'Your task has been submitted for review. You will be notified once approved.',
+                timer: 2000
+            });
+            
+            closeModal();
+            loadHistory();
+            
+        } catch (error) {
+            Swal.fire('Error', 'Submission failed. Please try again.', 'error');
+        }
+    }
+    
+    // Load History
+    async function loadHistory() {
+        const historyContainer = document.getElementById('history-container');
+        
+        // This would fetch from TASK_SUBMISSIONS sheet
+        // For now, showing placeholder
+        historyContainer.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-history"></i></div>
+                <div class="empty-text">Your submitted tasks will appear here</div>
+            </div>
+        `;
+    }
+    
+    // Tab Switcher
+    function switchTab(tab) {
+        // Update buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Update content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.getElementById(`tab-${tab}`).classList.add('active');
+    }
+</script>
+
+</body>
+</html>
