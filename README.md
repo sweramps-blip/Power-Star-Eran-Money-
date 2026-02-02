@@ -125,8 +125,7 @@ cd Power-Star-Eran-Money
 ```
 
 ### Step 2: Setup Google Sheet
-1. Create new Google Sheet: [sheets.google.com](https://sheets.google.com)
-2. Name it: **POWER_STAR_DATABASE**
+1. Create new Google Sheet: [sheets.google.com](**
 3. Create these tabs:
    - USERS_MASTER
    - WITHDRAWALS
@@ -190,12 +189,9 @@ const POWER_STAR_CONFIG = {
     // 🔴 CRITICAL: Replace with your Apps Script URL
     API_URL: "https://script.google.com/macros/s/.../exec",
     
-    // Security
-    SECURITY_KEY: "POWER_STAR_786_SECURE",  // Change this!
+     
     
-    // Admin access
-    ADMIN_NUMBERS: ["3052424335"],          // Your number
-    ADMIN_PASSWORD: "YourSecurePassword",   // Change this!
+    
     
     // Financial settings
     MIN_WITHDRAWAL: 525,
