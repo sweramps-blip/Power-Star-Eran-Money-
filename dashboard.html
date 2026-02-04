@@ -2,177 +2,485 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Power Star Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Star | Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* --- ORIGINAL DESIGN MAINTAINED --- */
-        body { background: #0f172a; color: white; font-family: 'Poppins', sans-serif; margin: 0; padding-bottom: 90px; }
-        .header-container { padding: 15px; }
-        .header-card { 
-            background: #f1c40f; color: black; padding: 30px 20px; 
-            border-radius: 40px; text-align: center; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: white;
+            padding-bottom: 90px;
+            min-height: 100vh;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 30px 20px 25px;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
             position: relative;
+            overflow: hidden;
         }
-        .top-row { display: flex; justify-content: space-between; align-items: flex-start; }
-        .u-id { background: rgba(0,0,0,0.08); padding: 8px 12px; border-radius: 50px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        .hist-btn { background: #1e293b; color: #f1c40f; width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: 0.3s; }
-        .hist-btn:active { transform: scale(0.9); }
-        
-        .balance-box { font-size: 40px; font-weight: 800; margin: 10px 0; font-family: 'Courier New', monospace; }
-        .syncing { opacity: 0.5; filter: blur(1px); }
 
-        /* --- 💯 PROFESSIONAL ANNOUNCEMENT BOX --- */
-        .ann-container { padding: 0 15px; margin-top: 5px; }
-        .ann-card {
-            background: #1e293b; border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.05); min-height: 160px;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden; position: relative;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 50%, rgba(251, 191, 36, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(251, 191, 36, 0.1) 0%, transparent 50%);
+            pointer-events: none;
         }
-        /* Image Adjustment: Har size ki pic fit hogi */
-        #ann-img { 
-            width: 100%; height: 100%; 
-            object-fit: cover; /* Ye pic ko kharab nahi hone deta */
-            display: none; 
-            border-radius: 25px;
+
+        .user-greeting {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
         }
-        #ann-msg { padding: 20px; text-align: center; color: #94a3b8; font-size: 14px; }
 
-        .nav { position: fixed; bottom: 0; width: 100%; background: #1e293b; display: flex; justify-content: space-around; padding: 15px 0; border-top: 2px solid #f1c40f; z-index: 1000; }
-        .nav a { color: #94a3b8; text-decoration: none; font-size: 11px; text-align: center; flex: 1; }
-        .nav a.active { color: #f1c40f; font-weight: bold; }
-        .nav i { font-size: 22px; display: block; margin-bottom: 5px; }
+        .greeting-text h3 {
+            font-size: 16px;
+            color: #94a3b8;
+            font-weight: 400;
+            margin-bottom: 5px;
+        }
 
-        #admin-ctrl { display: none; padding: 0 15px; margin-top: 15px; }
-        .admin-btn { width: 100%; padding: 15px; background: #ef4444; color: white; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        .greeting-text h2 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-id-badge {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+
+        .balance-card {
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
+            border: 2px solid rgba(251, 191, 36, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .balance-label {
+            font-size: 13px;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .balance-amount {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 40px;
+            font-weight: 900;
+            color: #fbbf24;
+            text-shadow: 0 4px 20px rgba(251, 191, 36, 0.5);
+        }
+
+        .content-container {
+            padding: 20px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* Announcement Card - 16:9 Aspect Ratio */
+        .announcement-section {
+            margin-bottom: 25px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-header i {
+            color: #fbbf24;
+        }
+
+        .announcement-card {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            background: #1e293b;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+
+        .announcement-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .announcement-content img,
+        .announcement-content video,
+        .announcement-content iframe {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .announcement-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        .announcement-placeholder i {
+            font-size: 48px;
+            color: rgba(251, 191, 36, 0.3);
+            margin-bottom: 15px;
+        }
+
+        .announcement-placeholder p {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Quick Actions Grid */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .action-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            border-radius: 18px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .action-card:hover::before {
+            left: 100%;
+        }
+
+        .action-card:hover {
+            border-color: #fbbf24;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(251, 191, 36, 0.2);
+        }
+
+        .action-icon {
+            font-size: 32px;
+            color: #fbbf24;
+            margin-bottom: 10px;
+        }
+
+        .action-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(251, 191, 36, 0.2);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 5px 15px;
+            border-radius: 12px;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #fbbf24;
+        }
+
+        .nav-item.active i {
+            transform: scale(1.2);
+        }
+
+        .nav-item:hover:not(.active) {
+            color: #94a3b8;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .announcement-card,
+        .action-card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .action-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .action-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .action-card:nth-child(4) {
+            animation-delay: 0.3s;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <div class="header-card">
-            <div class="top-row">
-                <div class="u-id" onclick="copyID()">ID: <span id="u-num">...</span> <i class="far fa-copy"></i></div>
-                <div class="hist-btn" onclick="window.location.href='history.html'"><i class="fas fa-history"></i></div>
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="user-greeting">
+            <div class="greeting-text">
+                <h3>Welcome Back,</h3>
+                <h2 id="user-name">Loading...</h2>
             </div>
-            <h2 id="u-name" style="margin:15px 0 0;">Hi, User</h2>
-            <p style="font-size: 10px; letter-spacing: 2px; margin-top:5px; opacity:0.8;">PKR AVAILABLE BALANCE</p>
-            <div class="balance-box" id="balance-container">Rs. <span id="u-balance">0.00</span></div>
+            <div class="user-id-badge" id="user-id">•••••</div>
+        </div>
+
+        <div class="balance-card">
+            <div class="balance-label">Available Balance</div>
+            <div class="balance-amount" id="user-balance">Rs. 0.00</div>
         </div>
     </div>
 
-    <div id="admin-ctrl">
-        <button class="admin-btn" onclick="window.location.href='admin_control.html'"><i class="fas fa-user-shield"></i> ADMIN PANEL</button>
-    </div>
-
-    <div class="ann-container">
-        <div class="ann-card" id="ann-card-box">
-            <img src="" id="ann-img" alt="Announcement">
-            <div id="ann-msg">
-                <i class="fas fa-bullhorn" style="font-size:24px; margin-bottom:10px; color:#f1c40f;"></i><br>
-                <span>Loading latest updates...</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="nav">
-        <a href="dashboard.html" class="active"><i class="fas fa-home"></i>Home</a>
-        <a href="marketing.html"><i class="fas fa-rocket"></i>Marketing</a>
-        <a href="team.html"><i class="fas fa-users"></i>Team</a>
-        <a href="wallet.html"><i class="fas fa-wallet"></i>Wallet</a>
-    </div>
-
-<script>
-    // Master Config (Locked)
-    const API = "https://script.google.com/macros/s/AKfycbzqjCh1uQmmwFi-Xh94qV0w58OBecr64hYbfmMNonkcs9SXYa3jYJi667vKMUWe9tsfMw/exec";
-    const KEY = "POWER_STAR_786_SECURE";
-
-    window.onload = async function() {
-        const userData = localStorage.getItem('power_star_user');
+    <!-- Main Content -->
+    <div class="content-container">
         
-        // 1. Session Check
-        if(!userData) { window.location.href = "auth.html"; return; }
-        let user = JSON.parse(userData);
+        <!-- Announcement Section -->
+        <div class="announcement-section">
+            <div class="section-header">
+                <i class="fas fa-bullhorn"></i>
+                <span>Announcements</span>
+            </div>
+            <div class="announcement-card">
+                <div class="announcement-content" id="announcement-content">
+                    <div class="announcement-placeholder">
+                        <i class="fas fa-image"></i>
+                        <p>No announcements at the moment</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        // 2. Admin Visibility Check
-        const admins = ["3052424335", "3082424335"];
-        if(admins.includes(String(user.number))) {
-            const adminBtn = document.getElementById('admin-ctrl');
-            if(adminBtn) adminBtn.style.display = 'block';
+        <!-- Quick Actions -->
+        <div class="section-header">
+            <i class="fas fa-bolt"></i>
+            <span>Quick Actions</span>
+        </div>
+        <div class="quick-actions">
+            <div class="action-card" onclick="window.location.href='team.html'">
+                <div class="action-icon"><i class="fas fa-users"></i></div>
+                <div class="action-label">My Team</div>
+            </div>
+            <div class="action-card" onclick="window.location.href='wallet.html'">
+                <div class="action-icon"><i class="fas fa-wallet"></i></div>
+                <div class="action-label">Wallet</div>
+            </div>
+            <div class="action-card" onclick="window.location.href='marketing.html'">
+                <div class="action-icon"><i class="fas fa-bullseye"></i></div>
+                <div class="action-label">Marketing</div>
+            </div>
+            <div class="action-card" onclick="handleLogout()">
+                <div class="action-icon"><i class="fas fa-sign-out-alt"></i></div>
+                <div class="action-label">Logout</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="dashboard.html" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="marketing.html" class="nav-item">
+            <i class="fas fa-rocket"></i>
+            <span>Marketing</span>
+        </a>
+        <a href="team.html" class="nav-item">
+            <i class="fas fa-users"></i>
+            <span>Team</span>
+        </a>
+        <a href="wallet.html" class="nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+    </div>
+
+    <script>
+        // Google Apps Script URL - Replace with your deployed web app URL
+        const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+
+        window.onload = async function() {
+            // Check if user is logged in
+            const userData = localStorage.getItem('power_star_user');
+            
+            if (!userData) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            const user = JSON.parse(userData);
+            
+            // Display user information
+            document.getElementById('user-name').textContent = user.name || 'User';
+            document.getElementById('user-id').textContent = user.user_id || '•••••';
+            document.getElementById('user-balance').textContent = `Rs. ${parseFloat(user.balance || 0).toFixed(2)}`;
+
+            // Fetch latest user data from server
+            await syncUserData(user.number);
+
+            // Load announcement
+            await loadAnnouncement();
+        };
+
+        async function syncUserData(userNumber) {
+            try {
+                const response = await fetch(`${API_URL}?action=getUser&number=${userNumber}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const userData = result.data;
+                    
+                    // Check if account is blocked
+                    if (userData.status === 'blocked') {
+                        alert('Your account has been blocked. Please contact support.');
+                        localStorage.clear();
+                        window.location.href = 'auth.html';
+                        return;
+                    }
+
+                    // Update localStorage with fresh data
+                    localStorage.setItem('power_star_user', JSON.stringify(userData));
+
+                    // Update display
+                    document.getElementById('user-name').textContent = userData.name;
+                    document.getElementById('user-id').textContent = userData.user_id;
+                    document.getElementById('user-balance').textContent = `Rs. ${parseFloat(userData.balance).toFixed(2)}`;
+                }
+            } catch (error) {
+                console.error('Data sync error:', error);
+            }
         }
 
-        // 3. Initial UI Display (Fast Load)
-        document.getElementById('u-num').innerText = user.user_id || "Loading...";
-        document.getElementById('u-name').innerText = "Hi, " + (user.name || "User");
-        document.getElementById('u-balance').innerText = parseFloat(user.balance || 0).toFixed(2);
+        async function loadAnnouncement() {
+            try {
+                const response = await fetch(`${API_URL}?action=getAnnouncement`);
+                const result = await response.json();
 
-        // 4. Live Sync from Google Sheet
-        const bBox = document.getElementById('balance-container');
-        if(bBox) bBox.classList.add('syncing');
-
-        try {
-            const res = await fetch(API);
-            const allData = await res.json();
-            
-            // User ko identify karna (Number se identify karna safest hai)
-            const fresh = allData.find(u => String(u.number) === String(user.number));
-            
-            if(fresh) {
-                // 🛡️ SECURITY LOCK: Agar admin ne block kiya ho
-                if(fresh.status === "blocked") {
-                    localStorage.clear();
-                    window.location.href = "auth.html?msg=blocked";
-                    return;
-                }
-
-                // Update UI & LocalStorage
-                document.getElementById('u-balance').innerText = parseFloat(fresh.balance || 0).toFixed(2);
-                localStorage.setItem('power_star_user', JSON.stringify(fresh));
-                
-                // Announcement Logic (Sheet ke aakhir mein announcement check karega)
-                // Maan lein aapne Sheet mein ek special row rakhi hai "ANN" ke naam se
-                const annData = allData.find(row => row.row_type === "ANN");
-                if(annData) {
-                    const annImg = annData.image_url || "";
-                    const annText = annData.message || "Welcome to Power Star!";
-
-                    if(annImg && annImg !== "") {
-                        const imgEl = document.getElementById('ann-img');
-                        imgEl.src = annImg;
-                        imgEl.style.display = 'block';
-                        document.getElementById('ann-msg').style.display = 'none';
-                    } else {
-                        document.getElementById('ann-msg').querySelector('span').innerText = annText;
+                if (result.success && result.data) {
+                    const announcement = result.data;
+                    const container = document.getElementById('announcement-content');
+                    
+                    if (announcement.type === 'image') {
+                        container.innerHTML = `<img src="${announcement.url}" alt="Announcement">`;
+                    } else if (announcement.type === 'video') {
+                        container.innerHTML = `<video src="${announcement.url}" controls autoplay muted loop></video>`;
+                    } else if (announcement.type === 'youtube') {
+                        container.innerHTML = `<iframe src="${announcement.url}" frameborder="0" allowfullscreen></iframe>`;
                     }
                 }
+            } catch (error) {
+                console.error('Announcement load error:', error);
             }
-        } catch(e) { 
-            console.log("Sync delayed, using offline data."); 
-        } finally { 
-            if(bBox) bBox.classList.remove('syncing'); 
         }
-    }
 
-    // Copy PSSN ID Function
-    function copyID() {
-        const idVal = document.getElementById('u-num').innerText;
-        if(idVal === "Loading...") return;
-        navigator.clipboard.writeText(idVal);
-        Swal.fire({ 
-            toast: true, 
-            position: 'top-end', 
-            icon: 'success', 
-            title: 'ID Copied: ' + idVal, 
-            showConfirmButton: false, 
-            timer: 1500 
-        });
-    }
-</script>
-        
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.clear();
+                window.location.href = 'auth.html';
+            }
+        }
+    </script>
+
 </body>
 </html>
