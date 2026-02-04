@@ -3,185 +3,716 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Power Star | Team</title>
+    <title>Power Star | Team Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #0f172a; color: white; font-family: sans-serif; padding: 15px; max-width: 480px; margin: auto; padding-bottom: 80px; }
-        h2 { margin-bottom: 20px; font-size: 22px; }
-        .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-        .stat-card { background: #1e293b; padding: 15px 5px; border-radius: 15px; text-align: center; border-bottom: 3px solid #fbbf24; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .stat-card h3 { font-size: 14px; color: #fbbf24; }
-        .stat-card p { font-size: 9px; color: #94a3b8; margin-top: 5px; font-weight: bold; }
-        .btn-share { width: 100%; padding: 16px; background: #fbbf24; color: black; font-weight: bold; border-radius: 15px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; }
-        .team-box { background: #1e293b; border-radius: 20px; padding: 10px 20px; margin-top: 20px; min-height: 250px; }
-        .sync-status { font-size: 10px; color: #4ade80; text-align: center; margin-top: 10px; opacity: 0.8; }
-        
-        /* Bottom Sheet UI */
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 100; }
-        .sheet { position: fixed; bottom: -100%; left: 0; width: 100%; background: #1e293b; border-radius: 25px 25px 0 0; padding: 25px; z-index: 101; transition: 0.4s; border-top: 2px solid #fbbf24; }
-        .sheet.active { bottom: 0; }
-        .options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; text-align: center; }
-        .opt-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; color: white; font-size: 20px; cursor: pointer; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: white;
+            padding: 20px;
+            padding-bottom: 100px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .page-header i {
+            font-size: 28px;
+            color: #fbbf24;
+        }
+
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Commission Info Card */
+        .commission-info {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .info-header i {
+            font-size: 24px;
+            color: #fbbf24;
+        }
+
+        .info-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #cbd5e1;
+        }
+
+        .info-text {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #94a3b8;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 3px solid #fbbf24;
+        }
+
+        .info-text strong {
+            color: #fbbf24;
+        }
+
+        /* Referral Share Card */
+        .referral-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .referral-label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .referral-code {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            color: #fbbf24;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(251, 191, 36, 0.3);
+        }
+
+        .invite-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .invite-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(251, 191, 36, 0.4);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            border-radius: 16px;
+            padding: 18px 10px;
+            text-align: center;
+            border-bottom: 3px solid #fbbf24;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Team Levels Section */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-title i {
+            color: #fbbf24;
+        }
+
+        .level-badge {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+
+        .team-container {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .team-member {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .team-member:last-child {
+            border-bottom: none;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 5px;
+        }
+
+        .member-details {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .member-earnings {
+            text-align: right;
+        }
+
+        .earnings-amount {
+            font-size: 14px;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 5px;
+        }
+
+        .earnings-label {
+            font-size: 10px;
+            color: #64748b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            color: rgba(251, 191, 36, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+        }
+
+        /* Share Sheet Modal */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        .share-sheet {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            border-radius: 30px 30px 0 0;
+            padding: 30px;
+            z-index: 101;
+            transition: bottom 0.4s ease-in-out;
+            max-width: 480px;
+            margin: 0 auto;
+            box-shadow: 0 -10px 50px rgba(0,0,0,0.5);
+        }
+
+        .share-sheet.active {
+            bottom: 0;
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .sheet-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fbbf24;
+        }
+
+        .sheet-close {
+            font-size: 24px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .sheet-close:hover {
+            color: #fbbf24;
+        }
+
+        .share-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .share-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .share-option:hover {
+            transform: translateY(-5px);
+        }
+
+        .share-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .share-icon.copy {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        }
+
+        .share-icon.whatsapp {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+        }
+
+        .share-icon.telegram {
+            background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+        }
+
+        .share-icon.more {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        }
+
+        .share-label {
+            font-size: 12px;
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(251, 191, 36, 0.2);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+            z-index: 99;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 5px 15px;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+        }
+
+        .nav-item.active {
+            color: #fbbf24;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .team-container {
+            animation: fadeInUp 0.6s ease-out;
+        }
     </style>
 </head>
 <body>
-    <h2><i class="fas fa-users" style="color:#fbbf24;"></i> My Team</h2>
-    
-    <div class="stat-grid">
-        <div class="stat-card"><h3 id="t-count">0</h3><p>TEAM SIZE</p></div>
-        <div class="stat-card"><h3 id="t-bonus">Rs. 0</h3><p>JOIN BONUS</p></div>
-        <div class="stat-card"><h3 id="t-comm">Rs. 0.00</h3><p>5% LIFETIME</p></div>
+
+    <div class="page-header">
+        <i class="fas fa-crown"></i>
+        <h1>Team Management</h1>
     </div>
 
-    <button class="btn-share" onclick="toggleSheet(true)"><i class="fas fa-share-alt"></i> INVITE FRIENDS</button>
-    <p id="sync-msg" class="sync-status">Checking for new commissions...</p>
-
-    <div class="team-box">
-        <div id="team-data"><p style="text-align:center; color:#64748b; padding-top:50px;">Loading team members...</p></div>
-    </div>
-
-    <div class="overlay" id="overlay" onclick="toggleSheet(false)"></div>
-    <div class="sheet" id="sheet">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3>Invite Friends</h3>
-            <i class="fas fa-times" onclick="toggleSheet(false)" style="cursor:pointer; font-size:20px;"></i>
+    <!-- Commission Info -->
+    <div class="commission-info">
+        <div class="info-header">
+            <i class="fas fa-info-circle"></i>
+            <h3>Commission Structure</h3>
         </div>
-        <div class="options">
-            <div onclick="copyLink()"><div class="opt-icon" style="background:#475569;"><i class="fas fa-link"></i></div><span style="font-size:10px;">Copy</span></div>
-            <div onclick="shareWA()"><div class="opt-icon" style="background:#25D366;"><i class="fab fa-whatsapp"></i></div><span style="font-size:10px;">WhatsApp</span></div>
-            <div onclick="shareTG()"><div class="opt-icon" style="background:#0088cc;"><i class="fab fa-telegram-plane"></i></div><span style="font-size:10px;">Telegram</span></div>
-            <div onclick="shareMore()"><div class="opt-icon" style="background:#fbbf24; color:black;"><i class="fas fa-ellipsis-h"></i></div><span style="font-size:10px;">More</span></div>
+        <div class="info-text">
+            <p><strong>Level 1 Bonus:</strong> You will receive Rs. 50 bonus on your Level 1 referral's 1st withdrawal.</p>
+            <p style="margin-top: 10px;"><strong>Level 2 Bonus:</strong> Similarly, you will get Rs. 25 when your Level 2 referral makes their 1st withdrawal.</p>
+            <p style="margin-top: 10px; color: #fbbf24;"><strong>Note:</strong> This is a manual process. Bonuses will be credited after verification.</p>
         </div>
     </div>
 
- <script>
-    // Config: Same as Auth and Dashboard
-    const API = "https://script.google.com/macros/s/AKfycbzqjCh1uQmmwFi-Xh94qV0w58OBecr64hYbfmMNonkcs9SXYa3jYJi667vKMUWe9tsfMw/exec";
-    const KEY = "POWER_STAR_786_SECURE";
-    
-    const userData = localStorage.getItem('power_star_user');
-    const user = userData ? JSON.parse(userData) : null;
-    // PSSN ID ko priority di gayi hai
-    const MY_ID = user ? (user.user_id || user.number) : null;
+    <!-- Referral Card -->
+    <div class="referral-card">
+        <div class="referral-label">Your Referral Code</div>
+        <div class="referral-code" id="referral-code">Loading...</div>
+        <button class="invite-button" onclick="openShareSheet()">
+            <i class="fas fa-share-nodes"></i>
+            Invite Friends
+        </button>
+    </div>
 
-    window.onload = () => { 
-        if(!user || !MY_ID) { window.location.href="auth.html"; } 
-        else { loadTeamAndSync(); }
-    };
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="level1-count">0</div>
+            <div class="stat-label">Level 1</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="level2-count">0</div>
+            <div class="stat-label">Level 2</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="total-bonus">Rs. 0</div>
+            <div class="stat-label">Total Bonus</div>
+        </div>
+    </div>
 
-    async function loadTeamAndSync() {
-        try {
-            // 1. Live data fetch karna (Direct Sheet Script se)
-            const res = await fetch(API);
-            const allUsers = await res.json();
-            
-            // 2. Filter Members: Jo aapka PSSN code use karke aye hain
-            const members = allUsers.filter(m => String(m.referral).trim().toUpperCase() === String(MY_ID).trim().toUpperCase());
-            
-            let currentTotalComm = 0;
+    <!-- Level 1 Team -->
+    <div class="section-header">
+        <div class="section-title">
+            <i class="fas fa-user-friends"></i>
+            <span>Level 1 Team</span>
+        </div>
+        <div class="level-badge">Direct Referrals</div>
+    </div>
+    <div class="team-container">
+        <div id="level1-team">
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <p>No Level 1 members yet. Start inviting!</p>
+            </div>
+        </div>
+    </div>
 
-            document.getElementById('t-count').innerText = members.length;
-            document.getElementById('t-bonus').innerText = "Rs. " + (members.length * 50);
+    <!-- Level 2 Team -->
+    <div class="section-header">
+        <div class="section-title">
+            <i class="fas fa-users"></i>
+            <span>Level 2 Team</span>
+        </div>
+        <div class="level-badge">Indirect Referrals</div>
+    </div>
+    <div class="team-container">
+        <div id="level2-team">
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <p>No Level 2 members yet</p>
+            </div>
+        </div>
+    </div>
 
-            if(members.length > 0) {
-                const listHTML = members.map(m => {
-                    const mBalance = parseFloat(m.balance) || 0;
-                    const mComm = (mBalance * 0.05); // 5% Commission Logic
-                    currentTotalComm += mComm;
+    <!-- Share Sheet -->
+    <div class="overlay" id="overlay" onclick="closeShareSheet()"></div>
+    <div class="share-sheet" id="shareSheet">
+        <div class="sheet-header">
+            <h3><i class="fas fa-share-nodes"></i> Share Referral Link</h3>
+            <i class="fas fa-times sheet-close" onclick="closeShareSheet()"></i>
+        </div>
+        <div class="share-options">
+            <div class="share-option" onclick="copyReferralLink()">
+                <div class="share-icon copy">
+                    <i class="fas fa-link"></i>
+                </div>
+                <div class="share-label">Copy Link</div>
+            </div>
+            <div class="share-option" onclick="shareOnWhatsApp()">
+                <div class="share-icon whatsapp">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+                <div class="share-label">WhatsApp</div>
+            </div>
+            <div class="share-option" onclick="shareOnTelegram()">
+                <div class="share-icon telegram">
+                    <i class="fab fa-telegram-plane"></i>
+                </div>
+                <div class="share-label">Telegram</div>
+            </div>
+            <div class="share-option" onclick="shareNative()">
+                <div class="share-icon more">
+                    <i class="fas fa-share-alt"></i>
+                </div>
+                <div class="share-label">More</div>
+            </div>
+        </div>
+    </div>
 
-                    return `
-                        <div style="display:flex; justify-content:space-between; padding:15px 0; border-bottom:1px solid rgba(255,255,255,0.05); align-items:center;">
-                            <div>
-                                <span style="font-size:14px; font-weight:bold; color:#fff;">${m.name}</span><br>
-                                <small style="color:#64748b;">ID: ${m.user_id}</small>
-                            </div>
-                            <div style="text-align:right;">
-                                <span style="font-size:12px; color:#fbbf24; font-weight:bold;">Rs. ${mComm.toFixed(2)}</span><br>
-                                <small style="color:#94a3b8; font-size:9px;">5% Commission</small>
-                            </div>
-                        </div>`;
-                }).join('');
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="dashboard.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="marketing.html" class="nav-item">
+            <i class="fas fa-rocket"></i>
+            <span>Marketing</span>
+        </a>
+        <a href="team.html" class="nav-item active">
+            <i class="fas fa-users"></i>
+            <span>Team</span>
+        </a>
+        <a href="wallet.html" class="nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+    </div>
 
-                document.getElementById('team-data').innerHTML = listHTML;
-                document.getElementById('t-comm').innerText = "Rs. " + currentTotalComm.toFixed(2);
-                
-                // 3. 🛡️ Run Professional Anti-Cheat Sync
-                await secureSync(currentTotalComm);
-            } else {
-                document.getElementById('team-data').innerHTML = `<p style="text-align:center; color:#64748b; padding-top:50px;">No team members found.</p>`;
-                document.getElementById('sync-msg').innerText = "Build your team to earn!";
+    <script>
+        // Google Apps Script URL
+        const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+        let currentUser = null;
+
+        window.onload = async function() {
+            // Check authentication
+            const userData = localStorage.getItem('power_star_user');
+            if (!userData) {
+                window.location.href = 'auth.html';
+                return;
             }
-        } catch(e) { 
-            console.error(e);
-            document.getElementById('team-data').innerHTML = "<p style='color:red; text-align:center;'>Sync Error</p>"; 
-        }
-    }
 
-    async function secureSync(totalCalculatedComm) {
-        try {
-            // Live current user data for balance comparison
-            const res = await fetch(API);
-            const allData = await res.json();
-            const liveUser = allData.find(u => String(u.number) === String(user.number));
+            currentUser = JSON.parse(userData);
             
-            if(liveUser) {
-                const alreadyClaimed = parseFloat(liveUser.claimed_comm) || 0;
-                const currentBalance = parseFloat(liveUser.balance) || 0;
+            // Display referral code
+            document.getElementById('referral-code').textContent = currentUser.number;
 
-                // Anti-Cheat: Only update if commission has increased
-                if(totalCalculatedComm > alreadyClaimed) {
-                    const pendingAmount = totalCalculatedComm - alreadyClaimed;
-                    const newBalance = currentBalance + pendingAmount;
+            // Load team data
+            await loadTeamData();
+        };
 
-                    // Google Script ko Update command bhejna
-                    await fetch(API, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: JSON.stringify({ 
-                            key: KEY,
-                            row_type: "UPDATE_BALANCE",
-                            number: user.number,
-                            balance: newBalance,
-                            claimed_comm: totalCalculatedComm 
-                        })
-                    });
-                    
-                    // Local Storage Refresh
-                    liveUser.balance = newBalance;
-                    liveUser.claimed_comm = totalCalculatedComm;
-                    localStorage.setItem('power_star_user', JSON.stringify(liveUser));
-                    document.getElementById('sync-msg').innerText = "✅ Commission Updated!";
-                } else {
-                    document.getElementById('sync-msg').innerText = "✅ All clear";
+        async function loadTeamData() {
+            try {
+                const response = await fetch(`${API_URL}?action=getTeam&number=${currentUser.number}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const { level1, level2, level1_bonus, level2_bonus, total_bonus } = result.data;
+
+                    // Update stats
+                    document.getElementById('level1-count').textContent = level1.length;
+                    document.getElementById('level2-count').textContent = level2.length;
+                    document.getElementById('total-bonus').textContent = `Rs. ${total_bonus || 0}`;
+
+                    // Display Level 1 team
+                    displayTeam('level1-team', level1, level1_bonus || 0);
+
+                    // Display Level 2 team
+                    displayTeam('level2-team', level2, level2_bonus || 0);
                 }
+            } catch (error) {
+                console.error('Error loading team data:', error);
             }
-        } catch(err) { document.getElementById('sync-msg').innerText = "Sync delayed..."; }
-    }
+        }
 
-    // --- Referral Tools ---
-    function toggleSheet(s) { 
-        document.getElementById('sheet').classList.toggle('active', s); 
-        const over = document.getElementById('overlay');
-        if(over) over.style.display = s ? 'block' : 'none'; 
-    }
+        function displayTeam(containerId, members, bonusPerMember) {
+            const container = document.getElementById(containerId);
 
-    function getLink() { 
-        const loc = window.location;
-        // PSSN base referral link
-        return `${loc.origin}${loc.pathname.replace('team.html', 'auth.html')}?ref=${MY_ID}`;
-    }
+            if (members.length === 0) {
+                return; // Keep empty state
+            }
 
-    function copyLink() { 
-        navigator.clipboard.writeText(getLink());
-        Swal.fire({ text: "Link Copied!", icon: "success", timer: 1000, showConfirmButton: false });
-        toggleSheet(false);
-    }
+            const teamHTML = members.map(member => `
+                <div class="team-member">
+                    <div class="member-info">
+                        <div class="member-name">${member.name || 'User'}</div>
+                        <div class="member-details">
+                            ID: ${member.user_id} • Joined: ${formatDate(member.timestamp)}
+                        </div>
+                    </div>
+                    <div class="member-earnings">
+                        <div class="earnings-amount">Rs. ${member.earned_bonus || bonusPerMember}</div>
+                        <div class="earnings-label">Your Bonus</div>
+                    </div>
+                </div>
+            `).join('');
 
-    function shareWA() { window.open(`https://wa.me/?text=Join Power Star & Earn! %0A${getLink()}`); }
-    function shareTG() { window.open(`https://t.me/share/url?url=${getLink()}`); }
-</script>   
-        
+            container.innerHTML = teamHTML;
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'N/A';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function getReferralLink() {
+            const baseUrl = window.location.origin + window.location.pathname.replace('team.html', 'auth.html');
+            return `${baseUrl}?ref=${currentUser.number}`;
+        }
+
+        function openShareSheet() {
+            document.getElementById('overlay').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('shareSheet').classList.add('active');
+            }, 10);
+        }
+
+        function closeShareSheet() {
+            document.getElementById('shareSheet').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('overlay').classList.remove('active');
+            }, 400);
+        }
+
+        async function copyReferralLink() {
+            const link = getReferralLink();
+            try {
+                await navigator.clipboard.writeText(link);
+                alert('✅ Referral link copied to clipboard!');
+                closeShareSheet();
+            } catch (error) {
+                console.error('Copy failed:', error);
+                alert('Failed to copy link. Please try again.');
+            }
+        }
+
+        function shareOnWhatsApp() {
+            const message = encodeURIComponent(`🌟 Join Power Star and start earning!\n\n💰 Great earning opportunities\n🎁 Registration bonus available\n\n👉 Register now: ${getReferralLink()}\n\nUse my referral code: ${currentUser.number}`);
+            window.open(`https://wa.me/?text=${message}`, '_blank');
+            closeShareSheet();
+        }
+
+        function shareOnTelegram() {
+            const message = encodeURIComponent(`Join Power Star and start earning! Register now: ${getReferralLink()}`);
+            window.open(`https://t.me/share/url?url=${getReferralLink()}&text=${message}`, '_blank');
+            closeShareSheet();
+        }
+
+        async function shareNative() {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Join Power Star',
+                        text: `Join Power Star and start earning! Use my referral code: ${currentUser.number}`,
+                        url: getReferralLink()
+                    });
+                    closeShareSheet();
+                } catch (error) {
+                    console.error('Share failed:', error);
+                }
+            } else {
+                alert('Native sharing not supported on this device.');
+            }
+        }
+    </script>
+
 </body>
 </html>
