@@ -1,101 +1,748 @@
+
+
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" /> <title>Power Star | Secure Auth</title> <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel=
+
+pasted
+
+16:20
+I'll analyze this authentication page and provide feedback on its security, code quality, and user experience.
+
+Security Analysis
+Critical Issues:
+
+API URL placeholder - The API_URL is set to a placeholder string. You need to replace this with your actual Google Apps Script Web App URL
+Client-side device ID - The device ID is generated client-side using predictable browser data, making it easy to spoof
+No HTTPS enforcement - The code doesn't verify or enforce HTTPS connections
+LocalStorage token storage - Storing authentication tokens in localStorage is vulnerable to XSS attacks; consider httpOnly cookies instead
+Medium Concerns:
+
+Password strength checker is purely visual - server should enforce minimum requirements
+No rate limiting visible on the client side (should be handled server-side)
+Referral code has no validation
+Code Quality
+Strengths:
+
+Clean, well-organized CSS with clear section comments
+Responsive design with mobile considerations
+Good accessibility features (aria-labels, proper input types)
+Smooth animations and professional UI
+Improvements Needed:
+
+Input sanitization - Add client-side validation before sending to server
+Error handling - More specific error messages for different failure scenarios
+Phone number formatting - Add automatic formatting as user types
+Loading states - Disable buttons during API calls to prevent double-submission
+Recommendations
+javascript
+// Add input sanitization
+function sanitizePhone(phone) {
+  return phone.replace(/\D/g, '').substring(0, 10);
+}
+
+// Add phone formatting
+document.getElementById("r-num").addEventListener('input', function(e) {
+  const val = e.target.value.replace(/\D/g, '');
+  if (val.length <= 10) e.target.value = val;
+});
+
+// Prevent double-submission
+async function doLogin() {
+  const btn = document.getElementById('login-btn');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  
+  try {
+    // ... existing login logic
+  } finally {
+    btn.disabled = false;
+  }
+}
+Next Steps:
+
+Replace REPLACE_WITH_YOUR_APPS_SCRIPT_WEBAPP_URL with your actual endpoint
+Implement proper server-side validation and rate limiting
+Consider adding 2FA for enhanced security
+Add CSRF protection tokens
+Implement session timeout handling
+The design is polished and user-friendly, but security should be your top priority before deploying to production. Would you like help with any specific improvements?
+
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+Pasted content
+18.81 KB •672 lines
+Formatting may be inconsistent from source
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Power Star | Secure Authentication</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* CSS design remains 100% same as your original */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); background-attachment: fixed; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .auth-container { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(20px); width: 100%; max-width: 440px; border-radius: 30px; padding: 40px 30px; border: 1px solid rgba(251, 191, 36, 0.3); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); position: relative; }
-        .brand-logo { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; }
-        h2 { color: #fbbf24; text-align: center; margin: 20px 0; }
-        .form-group { position: relative; margin-bottom: 20px; }
-        .form-label { display: block; color: #cbd5e1; font-size: 13px; margin-bottom: 8px; }
-        .phone-prefix { position: absolute; left: 18px; top: 42px; color: #fbbf24; font-weight: 700; border-right: 2px solid #334155; padding-right: 12px; }
-        input { width: 100%; background: rgba(15, 23, 42, 0.8); border: 2px solid rgba(51, 65, 85, 0.8); border-radius: 16px; padding: 16px 18px; color: white; outline: none; }
-        .phone-input { padding-left: 70px !important; }
-        .btn-primary { width: 100%; padding: 18px; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #000; font-weight: 700; border: none; border-radius: 16px; cursor: pointer; text-transform: uppercase; }
-        .hidden { display: none; }
-        .switch-form { text-align: center; margin-top: 25px; color: #94a3b8; font-size: 14px; }
-        .switch-form span { color: #fbbf24; cursor: pointer; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>Power Star | Secure Auth</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Outfit', sans-serif;
+  background: #0a0e1a;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   BACKGROUND GLOW
+   ============================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(251,191,36,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================================
+   PAGE LAYOUT
+   ============================================================ */
+.page {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+   LOGO AREA
+   ============================================================ */
+.logo-wrap {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.logo-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #0a0e1a;
+  box-shadow: 0 6px 24px rgba(251,191,36,0.35);
+  margin-bottom: 14px;
+}
+
+.logo-wrap h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.logo-wrap p {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 3px;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   AUTH CARD
+   ============================================================ */
+.card {
+  width: 100%;
+  max-width: 380px;
+  background: #131829;
+  border: 1px solid #1e2a45;
+  border-radius: 24px;
+  padding: 28px 22px 24px;
+  position: relative;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.35);
+}
+
+/* ============================================================
+   TAB SWITCHER (Login / Register)
+   ============================================================ */
+.tab-bar {
+  display: flex;
+  background: #0a0e1a;
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 28px;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #0a0e1a;
+  box-shadow: 0 3px 12px rgba(251,191,36,0.3);
+}
+
+/* ============================================================
+   FORM PANELS
+   ============================================================ */
+.form-panel {
+  display: none;
+  animation: fadeUp 0.35s ease;
+}
+
+.form-panel.active {
+  display: block;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   INPUT FIELD
+   ============================================================ */
+.field {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 7px;
+  padding-left: 2px;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap input {
+  width: 100%;
+  padding: 13px 14px;
+  padding-left: 42px;
+  background: #0f1423;
+  border: 1.5px solid #1e2a45;
+  border-radius: 13px;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  -webkit-appearance: none;
+}
+
+.input-wrap input::placeholder {
+  color: #3d4f6e;
+  font-weight: 400;
+}
+
+.input-wrap input:focus {
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 3px rgba(251,191,36,0.15);
+}
+
+/* Icon inside input */
+.input-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3d4f6e;
+  font-size: 14px;
+  pointer-events: none;
+  transition: color 0.25s;
+}
+
+.input-wrap:focus-within .input-icon {
+  color: #fbbf24;
+}
+
+/* Eye toggle icon */
+.eye-toggle {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3d4f6e;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.25s;
+  background: none;
+  border: none;
+  padding: 4px;
+  z-index: 2;
+}
+
+.eye-toggle:hover {
+  color: #fbbf24;
+}
+
+/* Phone prefix */
+.phone-prefix {
+  position: absolute;
+  left: 38px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fbbf24;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.input-wrap.phone input {
+  padding-left: 78px;
+}
+
+/* ============================================================
+   PASSWORD STRENGTH BAR
+   ============================================================ */
+.strength-track {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+  height: 3px;
+}
+
+.strength-seg {
+  flex: 1;
+  border-radius: 3px;
+  background: #1e2a45;
+  transition: background 0.3s;
+}
+
+.strength-seg.on-weak   { background: #ef4444; }
+.strength-seg.on-medium { background: #f97316; }
+.strength-seg.on-strong { background: #22c55e; }
+
+.strength-label {
+  font-size: 11px;
+  margin-top: 5px;
+  font-weight: 600;
+  min-height: 16px;
+  padding-left: 2px;
+  transition: color 0.3s;
+}
+
+/* ============================================================
+   TERMS ROW
+   ============================================================ */
+.terms-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 20px;
+  margin-top: 4px;
+}
+
+.terms-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  margin-top: 1px;
+  accent-color: #fbbf24;
+  cursor: pointer;
+}
+
+.terms-row label {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.terms-row label .highlight {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+/* ============================================================
+   SUBMIT BUTTON
+   ============================================================ */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border: none;
+  border-radius: 13px;
+  color: #0a0e1a;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: transform 0.15s, box-shadow 0.25s, filter 0.25s;
+  box-shadow: 0 4px 16px rgba(251,191,36,0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent 60%);
+  pointer-events: none;
+}
+
+.submit-btn:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 22px rgba(251,191,36,0.4);
+}
+
+.submit-btn:active {
+  transform: scale(0.96);
+}
+
+/* ============================================================
+   DEVICE ID ROW
+   ============================================================ */
+.device-row {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 11px;
+  color: #3d4f6e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.device-row .did-value {
+  color: #64748b;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.device-row .did-eye {
+  cursor: pointer;
+  color: #3d4f6e;
+  font-size: 11px;
+  transition: color 0.2s;
+}
+
+.device-row .did-eye:hover {
+  color: #fbbf24;
+}
+
+/* ============================================================
+   SWEETALERT OVERRIDE (dark theme)
+   ============================================================ */
+.swal2-popup {
+  background: #131829 !important;
+  color: #fff !important;
+  border-radius: 18px !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+.swal2-title { color: #fff !important; }
+.swal2-html-container { color: #94a3b8 !important; }
+.swal2-confirm {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+  color: #0a0e1a !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+}
+
+/* ============================================================
+   MOBILE FINE-TUNE
+   ============================================================ */
+@media (max-width: 400px) {
+  .page { padding: 24px 12px; }
+  .card { padding: 22px 16px 20px; border-radius: 20px; }
+  .logo-icon { width: 54px; height: 54px; font-size: 24px; border-radius: 15px; }
+  .logo-wrap h1 { font-size: 20px; }
+  .tab-btn { font-size: 13px; padding: 9px 0; }
+  .input-wrap input { font-size: 15px; padding: 12px 14px 12px 40px; }
+  .input-wrap.phone input { padding-left: 74px; }
+}
+
+/* Prevent zoom on input focus on iOS */
+@media screen and (max-width: 480px) {
+  input { font-size: 16px !important; }
+}
+</style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="brand-logo"><i class="fas fa-star"></i> POWER STAR</div>
-        <div id="login-form">
-            <h2>Secure Login</h2>
-            <div class="form-group">
-                <label class="form-label">Mobile Number</label>
-                <span class="phone-prefix">+92</span>
-                <input type="tel" id="login-number" class="phone-input" placeholder="3xxxxxxxxx" maxlength="10">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Password</label>
-                <input type="password" id="login-password" placeholder="Enter password">
-            </div>
-            <button class="btn-primary" onclick="handleLogin()">Login</button>
-            <p class="switch-form">New? <span onclick="switchForm()">Create Account</span></p>
-        </div>
 
-        <div id="register-form" class="hidden">
-            <h2>Join Power Star</h2>
-            <div class="form-group"><input type="text" id="reg-name" placeholder="Full Name"></div>
-            <div class="form-group">
-                <span class="phone-prefix" style="top:18px">+92</span>
-                <input type="tel" id="reg-number" class="phone-input" placeholder="3xxxxxxxxx" maxlength="10">
-            </div>
-            <div class="form-group"><input type="password" id="reg-password" placeholder="Password"></div>
-            <div class="form-group"><input type="text" id="reg-referral" placeholder="Referral (Optional)"></div>
-            <button class="btn-primary" onclick="handleRegistration()">Register</button>
-            <p class="switch-form">Have account? <span onclick="switchForm()">Login</span></p>
-        </div>
+<div class="page">
+
+  <!-- LOGO -->
+  <div class="logo-wrap">
+    <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+    <h1>Power Star</h1>
+    <p>Secure Authentication</p>
+  </div>
+
+  <!-- CARD -->
+  <div class="card">
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn"        id="tab-register" onclick="switchTab('register')">Register</button>
     </div>
 
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzkcV4tpgfvNZvg7L5nv6wdVRnzkobG2KPibF7dsej0M209fuAQU0ENeVEJCDtHI2o/exec";
-        const DEVICE_ID = "PS-" + btoa(navigator.userAgent).substring(0, 10);
+    <!-- =========== LOGIN PANEL =========== -->
+    <div class="form-panel active" id="panel-login">
 
-        function switchForm() {
-            document.getElementById('login-form').classList.toggle('hidden');
-            document.getElementById('register-form').classList.toggle('hidden');
-        }
+      <div class="field">
+        <label>Phone Number</label>
+        <div class="input-wrap phone">
+          <i class="fas fa-phone input-icon"></i>
+          <span class="phone-prefix">+92</span>
+          <input type="tel" id="l-num" placeholder="3001234567" inputmode="numeric">
+        </div>
+      </div>
 
-        async function handleLogin() {
-            const num = document.getElementById('login-number').value;
-            const pass = document.getElementById('login-password').value;
-            Swal.showLoading();
-            const res = await fetch(`${API_URL}?action=login&number=${num}&password=${encodeURIComponent(pass)}`);
-            const data = await res.json();
-            if(data.success) {
-                localStorage.setItem('user', JSON.stringify(data.data));
-                window.location.href = 'dashboard.html';
-            } else { Swal.fire('Error', data.message, 'error'); }
-        }
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" id="l-pass" placeholder="Enter password">
+          <button class="eye-toggle" onclick="toggleEye('l-pass', this)" aria-label="Toggle password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
 
-        async function handleRegistration() {
-            const name = document.getElementById('reg-name').value;
-            const num = document.getElementById('reg-number').value;
-            const pass = document.getElementById('reg-password').value;
-            const ref = document.getElementById('reg-referral').value;
-            
-            if(!name || num.length < 10) return Swal.fire('Error', 'Invalid details', 'warning');
-            
-            Swal.showLoading();
-            const params = new URLSearchParams({ action:'register', name, number:num, password:pass, referral:ref, device_id:DEVICE_ID });
-            const res = await fetch(`${API_URL}?${params.toString()}`);
-            const data = await res.json();
-            if(data.success) {
-                Swal.fire('Success', 'Registered!', 'success').then(() => switchForm());
-            } else { Swal.fire('Failed', data.message, 'error'); }
-        }
-    </script>
+      <button class="submit-btn" id="login-btn" onclick="doLogin()">Login</button>
+
+    </div>
+
+    <!-- =========== REGISTER PANEL =========== -->
+    <div class="form-panel" id="panel-register">
+
+      <div class="field">
+        <label>Full Name</label>
+        <div class="input-wrap">
+          <i class="fas fa-user input-icon"></i>
+          <input type="text" id="r-name" placeholder="Your full name">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Phone Number</label>
+        <div class="input-wrap phone">
+          <i class="fas fa-phone input-icon"></i>
+          <span class="phone-prefix">+92</span>
+          <input type="tel" id="r-num" placeholder="3001234567" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" id="r-pass" placeholder="Create password" oninput="checkStrength()">
+          <button class="eye-toggle" onclick="toggleEye('r-pass', this)" aria-label="Toggle password">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <!-- Strength segments -->
+        <div class="strength-track">
+          <div class="strength-seg" id="seg1"></div>
+          <div class="strength-seg" id="seg2"></div>
+          <div class="strength-seg" id="seg3"></div>
+        </div>
+        <div class="strength-label" id="strength-label"></div>
+      </div>
+
+      <div class="field">
+        <label>Referral Code <span style="color:#3d4f6e;font-weight:400">(optional)</span></label>
+        <div class="input-wrap">
+          <i class="fas fa-tag input-icon"></i>
+          <input type="text" id="r-ref" placeholder="Enter referral code">
+        </div>
+      </div>
+
+      <div class="terms-row">
+        <input type="checkbox" id="terms-chk">
+        <label for="terms-chk">
+          I accept the <span class="highlight">Terms &amp; Conditions</span> and <span class="highlight">Privacy Policy</span>
+        </label>
+      </div>
+
+      <button class="submit-btn" id="register-btn" onclick="doRegister()">Create Account</button>
+
+    </div>
+
+    <!-- DEVICE ID -->
+    <div class="device-row">
+      <i class="fas fa-shield-halved" style="font-size:10px"></i>
+      Device ID:
+      <span class="did-value" id="did-text">######</span>
+      <i class="fas fa-eye did-eye" id="did-eye-icon" onclick="toggleDID()"></i>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// Replace with your deployed Apps Script Web App URL:
+const API_URL = 'REPLACE_WITH_YOUR_APPS_SCRIPT_WEBAPP_URL';
+
+// ─── DEVICE ID GENERATOR (informational only) ──────────────────────────────────────
+const current_device_id = btoa(
+  navigator.userAgent + screen.width + screen.height +
+  Intl.DateTimeFormat().resolvedOptions().timeZone
+).substring(0, 25);
+
+document.getElementById("did-text").innerText = current_device_id.slice(0, 6) + "****";
+
+// ─── TAB SWITCHER ────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById("tab-login").classList.toggle("active", tab === 'login');
+  document.getElementById("tab-register").classList.toggle("active", tab === 'register');
+  document.getElementById("panel-login").classList.toggle("active", tab === 'login');
+  document.getElementById("panel-register").classList.toggle("active", tab === 'register');
+}
+
+// ─── UI HELPERS ──────────────────────────────────────────────
+function toggleEye(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const icon  = btn.querySelector("i");
+  input.type = (input.type === "password") ? "text" : "password";
+  icon.classList.toggle("fa-eye");
+  icon.classList.toggle("fa-eye-slash");
+}
+
+function toggleDID() {
+  const el = document.getElementById("did-text");
+  const icon = document.getElementById("did-eye-icon");
+  if (el.innerText.includes("*")) {
+    el.innerText = current_device_id;
+    icon.classList.replace("fa-eye", "fa-eye-slash");
+  } else {
+    el.innerText = current_device_id.slice(0, 6) + "****";
+    icon.classList.replace("fa-eye-slash", "fa-eye");
+  }
+}
+
+function checkStrength() {
+  const p = document.getElementById("r-pass").value;
+  const segs = [document.getElementById("seg1"), document.getElementById("seg2"), document.getElementById("seg3")];
+  const label = document.getElementById("strength-label");
+  segs.forEach(s => s.className = "strength-seg");
+  if (!p) { label.innerText = ""; return; }
+
+  if (p.length < 6) { segs[0].classList.add("on-weak"); label.innerText = "Weak"; label.style.color = "#ef4444"; }
+  else if (p.length < 10) { segs[0].classList.add("on-medium"); segs[1].classList.add("on-medium"); label.innerText = "Medium"; label.style.color = "#f97316"; }
+  else { segs.forEach(s => s.classList.add("on-strong")); label.innerText = "Strong"; label.style.color = "#22c55e"; }
+}
+
+// ─── Helper: POST JSON to Apps Script ─────────────────────────
+async function postJSON(payload) {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    return await res.json();
+  } catch (e) {
+    console.error(e);
+    return { ok: false, error: 'Network error' };
+  }
+}
+
+// ─── REGISTER (server-backed) ─────────────────────
+async function doRegister() {
+  const name = document.getElementById("r-name").value.trim();
+  const num = document.getElementById("r-num").value.trim();
+  const pass = document.getElementById("r-pass").value.trim();
+  const ref = document.getElementById("r-ref").value.trim();
+  const termsChecked = document.getElementById("terms-chk").checked;
+
+  if (!name || !num || !pass) return Swal.fire("Error", "Saray fields bharna lazmi hain.", "warning");
+  if (num.length < 10) return Swal.fire("Ghalti", "Mobile number sahi tarah likhein (e.g. 3001234567).", "info");
+  if (!termsChecked) return Swal.fire("Wait!", "Terms & Conditions accept karein.", "info");
+
+  Swal.fire({ title: 'Account Ban raha hy...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+  const payload = { action: 'register', name, number: num, password: pass, referral: ref, device_token: current_device_id };
+  const res = await postJSON(payload);
+  Swal.close();
+  if (!res.ok) return Swal.fire("Error", res.error || "Registration failed", "error");
+
+  Swal.fire({ icon: 'success', title: 'Registration Done!', text: 'Ab aap login kar sakte hain.', confirmButtonText: 'Theek hy' }).then(() => {
+    switchTab('login');
+  });
+}
+
+// ─── LOGIN (server-backed) ───────────────────────────
+async function doLogin() {
+  const num = document.getElementById("l-num").value.trim();
+  const pass = document.getElementById("l-pass").value.trim();
+  if (!num || !pass) return Swal.fire("Tawajjo Dein", "Saray fields bharna lazmi hain.", "warning");
+
+  Swal.fire({ title: 'Signing in...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+  const payload = { action: 'login', number: num, password: pass, device_token: current_device_id };
+  const res = await postJSON(payload);
+  Swal.close();
+
+  if (!res.ok) {
+    if (res.code === 'DEVICE_MISMATCH') return Swal.fire("Security Alert", "Device mismatch. Admin verification required.", "warning");
+    return Swal.fire("Ghalti", res.error || "Number ya Password darust nahi hy.", "error");
+  }
+
+  // store token and minimal user info
+  localStorage.setItem('ps_token', res.token);
+  localStorage.setItem('ps_user', JSON.stringify(res.user || {}));
+
+  Swal.fire({ icon:'success', title:'Khush Amdeed!', text:'Login kamyab raha.', timer:1200, showConfirmButton:false }).then(()=> {
+    window.location.href = 'dashboard.html';
+  });
+}
+</script>
+
 </body>
 </html>
